@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include<iostream>
 #include<new>
-
+#include <string>
+#define MAX_SIZE 4294967296
 using namespace std;
 
 struct HuffmanNode {
@@ -174,6 +175,14 @@ void readFileAndCountFrequencies(const char* filename, long long* freq) {
         printf("Error: Cannot open file!\n");
         return;
     }
+    fseek(inputFile, 0, SEEK_END);    
+    long long file_size = ftell(inputFile); 
+    rewind(inputFile);
+    printf("file size = %lld\n", file_size);
+    if (file_size > MAX_SIZE) {
+        printf("Error: File exceeds 4GB limit\n");
+        exit(0);
+    }
     int ch;
     while ((ch = fgetc(inputFile)) != EOF) {
         if (ch < 128) {
@@ -213,6 +222,21 @@ public:
         for (int i = 0; i < 256; i++) {
             if (!codes[i].empty()) {
                 printf("%c: %s\n", i, codes[i].c_str());
+            }
+        }
+    }
+    void savedGeneratedCodesToASeparateFile(char * inputFilename) {
+        string codes[256];
+        char outputFilename[256];
+        strcpy(outputFilename, inputFilename);
+        char* dot = strrchr(outputFilename, '.');
+        if (dot) strcpy(dot, ".cod");
+        else strcpy(outputFilename, ".cod");
+        getcodes(root, "", codes);
+        FILE* outputfile = fopen(outputFilename, "w");
+        for (int i = 0; i < 256; i++) {
+            if (!codes[i].empty()) {
+                fprintf(outputfile,"%c: %s\n", i, codes[i].c_str());
             }
         }
     }
@@ -303,7 +327,8 @@ void getrootofhuffman(HuffmanTree& ht, Heap*& H) {
     fclose(outputFile);
 
 }*/
-void compressFile(const char* inputFilename, const char* outputFilename, HuffmanTree& ht)
+
+void compressFile(char* inputFilename, HuffmanTree& ht)
 {
     // Implementation of file compression using Huffman coding
     // This function is a placeholder and needs to be implemented
@@ -316,7 +341,14 @@ void compressFile(const char* inputFilename, const char* outputFilename, Huffman
     ht.printCodes();
     string codes[256];
     ht.getCodesArray(codes);
+    ht.savedGeneratedCodesToASeparateFile(inputFilename);
     FILE* inputFile = fopen(inputFilename, "rb");
+    char outputFilename[256];
+    strcpy(outputFilename, inputFilename);
+    char* dot = strrchr(outputFilename, '.');
+    if (dot) strcpy(dot, ".com");
+    else strcpy(outputFilename, ".com");
+
     FILE* outputFile = fopen(outputFilename, "wb");
     if (inputFile == NULL || outputFile == NULL) {
         printf("Error: Cannot open input or output file!\n");
@@ -354,7 +386,7 @@ void compressFile(const char* inputFilename, const char* outputFilename, Huffman
 
 int main() {
     HuffmanTree* ht = new HuffmanTree();
-    compressFile("Text.txt", "compressed.com", *ht);
+    compressFile((char *)"Text.txt", *ht);
     delete ht;
     return 0;
 }
