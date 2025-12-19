@@ -384,9 +384,28 @@ void compressFile(char* inputFilename, HuffmanTree& ht)
 
 }
 
-int main() {
-    HuffmanTree* ht = new HuffmanTree();
-    compressFile((char *)"Text.txt", *ht);
-    delete ht;
+int main(int argc, char* argv[]) {
+    if (argc < 4) {
+        printf("Usage: -c/d input_file output_file");
+        return 1;
+    }
+    if (!strcmp(argv[1], "-c"))
+    {
+        printf("Compressing %s into %s...\n", argv[2], argv[3]);
+        HuffmanTree* ht = new HuffmanTree();
+        compressFile(argv[2], argv[3], *ht);
+        delete ht;
+        printf("Compression finished.\n");
+    }
+    else if (!strcmp(argv[1], "-d"))
+    {
+        printf("Decompressing %s into %s...\n", argv[2], argv[3]);
+        decompressFile(argv[2], argv[3]);
+        printf("Decompression finished.\n");
+    }
+    else {
+        printf("Invalid option! Use -c for compression or -d for decompression.\n");
+    }
     return 0;
 }
+
