@@ -516,6 +516,7 @@ void compressFile(char *inputFilename, char *outputFilename)
 	delete H;
 	delete[] inputBuffer;
 	delete[] outputBuffer;
+	delete ht;
 }
 void readcodesfromfile(char *filename, char *codes[256])
 {
@@ -634,15 +635,23 @@ void decompressFile(const char *inputFilename)
 				{
 					current = current->right;
 				}
-				if (current->left == nullptr && current->right == NULL)
+				if (current->left == NULL && current->right == NULL)
 				{
-					fputc(current->data, outputFile);
+					outputBuffer[outIndex++] = current->data;
+					if (outIndex == outputbufferSize)
+					{
+						fwrite(outputBuffer, 1, outputbufferSize, outputFile);
+						outIndex = 0;
+					}
 					current = root;
 				}
 			}
 		}
-		// printf("decompressed %d/%ld bytes\r", lastByteIndex + 1, dataSize);
-		// fflush(stdout);
+	}
+	// Write any remaining bytes in output buffer
+	if (outIndex > 0)
+	{
+		fwrite(outputBuffer, 1, outIndex, outputFile);
 	}
 	finalFileSize = ftell(outputFile);
 
@@ -651,6 +660,7 @@ void decompressFile(const char *inputFilename)
 	// 7. free allocated memory
 	delete[] inputBuffer;
 	delete[] outputBuffer;
+	delete ht;
 	for (int i = 0; i < 256; i++)
 		free(codes[i]);
 	// 8. print decompression statistics
